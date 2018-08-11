@@ -22,7 +22,7 @@ option_parser = OptionParser.new do |opts|
   end
 
   opts.on('-b', '--buttons BUTTONS', 'Filter by button count of equal or lesser value') do |buttons|
-    options[:buttons] = buttons
+    options[:buttons] = buttons.to_i
   end
 
   opts.on('-s', '--source SOURCE', 'Source folder path') do |source_path|
@@ -59,15 +59,12 @@ class Taglist
       rom[:description] = xml_doc.at_xpath("/mame/machine[@name='#{rom[:name]}']/description").text
 
       xml_buttons = xml_doc.xpath("/mame/machine[@name='#{rom[:name]}']/input/control").first.attribute('buttons')
-      xml_buttons.nil? ? rom[:buttons] = 0 : rom[:buttons] = xml_buttons
+      xml_buttons.nil? ? rom[:buttons] = 0 : rom[:buttons] = xml_buttons.text.to_i
     end
   end
 
   def filter_by_buttons(max)
     @list.delete_if { |rom|
-      puts rom
-      puts rom[:buttons]
-      puts max
       rom[:buttons] > max
     }
   end
@@ -93,7 +90,7 @@ class Taglist
 
     header_buttons = "BUTTONS"
     longest_buttons = @list.max_by { |rom| rom[:buttons].to_s.length }
-    charspace_buttons = longest_buttons[:buttons].to_s.length > header_buttons.length ? longest_buttons[:buttons].to_s.length : header_buttons.length
+    charspace_buttons = longest_buttons[:buttons].to_s.length > header_buttons.length ? longest_buttons[:buttons].length : header_buttons.to_s.length
 
     header_match = "MATCH"
     charspace_match = header_match.length
